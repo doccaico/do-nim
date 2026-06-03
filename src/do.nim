@@ -14,7 +14,7 @@ import ./[
 
 
 const HELP_MSG = """
-Usage:
+USAGE:
     do.exe [OPTION] COMMAND
 OPTION:
     -h, --help                  ヘルプメッセージを表示
@@ -24,7 +24,8 @@ COMMAND:
     shitaraba                   Shitarabaを閲覧
     delete_duplicate_path       環境変数PATHの重複を解消して表示
     verse                       聖書(新共同訳)を表示
-    wiki                        ランダムWIKIのリストを表示"""
+    wiki                        ランダムWIKIのリストを表示
+    nightup                     ソフトウェアアップデーター"""
 
 proc main(argv: seq[string]) =
   if argv.len == 0:
@@ -39,7 +40,9 @@ proc main(argv: seq[string]) =
   of "verse": verse.run(argv[1..^1])
   of "wiki": wiki.run(argv[1..^1])
   of "nightup": nightup.run(argv[1..^1])
-  else: stderrMsgAndExit fmt"unknown command '{argv[0]}'\n{HELP_MSG}"
+  else:
+    stderr.writeLine fmt"unknown command '{argv[0]}'"
+    stderrMsgAndExit HELP_MSG
 
 when isMainModule:
   main(commandLineParams())
