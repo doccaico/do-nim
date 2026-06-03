@@ -4,7 +4,7 @@
 ```sh
 $ nimble install regex
 
-$ nim c --cc:vcc --mm:arc -d:release --opt:size --threads:off src\do.nim
+$ nim c --cc:vcc --mm:arc -d:release --opt:size --threads:off -o:do.exe src\do.nim
 $ upx --best --lzma do.exe
 ```
 
