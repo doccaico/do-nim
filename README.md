@@ -1,5 +1,13 @@
 ### Do (Windows only .-.)
 
+### Required Softwares
+- busybox64u (iconv)
+- curl
+- git
+- less
+- rg
+- tar
+
 ### Build and Minimizing Binary Size
 ```sh
 $ nimble install regex
