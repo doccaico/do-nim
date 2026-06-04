@@ -1,4 +1,5 @@
-import std/[os]
+import std/[os, strformat]
+
 
 const
   Reset* = "\x1b[0m"
@@ -25,3 +26,10 @@ proc rmIfExist*(path: string) =
 proc rmDirIfExist*(path: string) =
   if dirExists(path):
     removeDir(path)
+
+proc rmDir*(path: string) =
+  try:
+    removeDir(path, checkDir = true)
+    echo fmt"""Removed: '{path}'"""
+  except OSError as e:
+    stderrMsgAndExit fmt"failed to removeDir: {e.msg}"
