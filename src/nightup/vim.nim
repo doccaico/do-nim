@@ -6,7 +6,7 @@ import ../[utils]
 proc run*() =
   # 1. 最新リリースのJSONを取得
   let url = "https://api.github.com/repos/vim/vim-win32-installer/releases/latest"
-  let (output, curlRes) = execCmdEx(fmt"""curl -sSL -A "Mozilla/5.0" "{url}"""")
+  let (output, curlRes) = execCmdEx(fmt"""curl -sSL -A "Mozilla/5.0" {url}""")
   if curlRes != 0:
     stderrMsgAndExit "failed to download json"
   

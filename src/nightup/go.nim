@@ -3,6 +3,7 @@ import regex
 
 import ../[utils]
 
+
 proc run*(distDir: string, downloadDir: string) =
   # 1. 最新バージョンのJSONを取得
   let url = "https://go.dev/dl/?mode=json"

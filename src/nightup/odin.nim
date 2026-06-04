@@ -3,10 +3,11 @@ import regex
 
 import ../[utils]
 
+
 proc run*(distDir: string, downloadDir: string) =
   # 1. 最新バージョンのJSONを取得
   let url = "https://f001.backblazeb2.com/file/odin-binaries/nightly.json"
-  let (output, curlRes) = execCmdEx(fmt"""curl -sSL -A "Mozilla/5.0" "{url}"""")
+  let (output, curlRes) = execCmdEx(fmt"""curl -sSL -A "Mozilla/5.0" {url}""")
   if curlRes != 0:
     stderrMsgAndExit "failed to download nightly.json"
   
@@ -25,25 +26,26 @@ proc run*(distDir: string, downloadDir: string) =
     stderrMsgAndExit "failed to find ZIP URL for odin-windows-amd64 nightly"
 
   # URLエンコードされた「+」である「%2B」を使用してZIP名とURLを構築
-  let zipName = "odin-windows-amd64-nightly%2B" & nightlyDate & ".zip"
-  let downloadUrl = "https://f001.backblazeb2.com/file/odin-binaries/nightly/" & zipName
+  let zipName = fmt"odin-windows-amd64-nightly%2B{nightlyDate}.zip"
+  let downloadUrl = fmt"https://f001.backblazeb2.com/file/odin-binaries/nightly/{zipName}"
   echo "Download URL: ", downloadUrl
 
   # 3. 作業用ディレクトリの作成
   let workDirName = "odin-nightly-upgrade-working"
   let workDirPath = downloadDir / workDirName
 
-  try:
-    rmDirIfExist(workDirPath)
-    echo fmt"""Removed: "{workDirPath}""""
-  except CatchableError:
-    stderrMsgAndExit fmt"failed to remove existing work dir: {workDirPath}"
+  if dirExists(workDirPath):
+    try:
+      removeDir(workDirPath)
+      echo fmt"""Removed: '{workDirPath}'"""
+    except OSError as e:
+      stderrMsgAndExit fmt"failed to remove existing work dir: {e.msg}"
 
   try:
     createDir(workDirPath)
-    echo fmt"""Created: "{workDirPath}""""
-  except CatchableError:
-    stderrMsgAndExit fmt"failed to create work dir: {workDirPath}"
+    echo fmt"""Created: '{workDirPath}'"""
+  except OSError as e:
+    stderrMsgAndExit fmt"failed to createDir: {e.msg}"
 
   # 4. ZIPファイルのダウンロード
   let localZip = "odin-nightly-latest.zip"
@@ -59,8 +61,8 @@ proc run*(distDir: string, downloadDir: string) =
   zipProcess.close()
 
   if zipExit != 0:
-    rmDirIfExist(workDirPath)
-    stderrMsgAndExit "failed to download ZIP"
+    utils.rmdir(workDirPath)
+    echo fmt"""Removed: '{workDirPath}'"""
   
   echo "Download (ZIP) is done"
 
@@ -75,32 +77,31 @@ proc run*(distDir: string, downloadDir: string) =
   tarProcess.close()
 
   if tarExit != 0:
-    rmDirIfExist(workDirPath)
+    utils.rmdir(workDirPath)
     stderrMsgAndExit "failed to extract ZIP"
   
   echo "Extraction is done"
 
   # 6. 不要になったZIPの削除
-  try:
-    rmIfExist(localZipPath)
-    echo fmt"""Removed: "{localZipPath}""""
-  except CatchableError:
-    rmDirIfExist(workDirPath)
-    stderrMsgAndExit "failed to remove local ZIP file"
+  if tryRemoveFile(localZipPath):
+    echo fmt"""Removed: '{localZipPath}'"""
+  else:
+    utils.rmdir(workDirPath)
+    stderrMsgAndExit "failed to removeFile: '{localZipPath}'"
 
   # 7. 配置（アップデートの適用）
   try:
-    rmDirIfExist(distDir)
-    echo fmt"""Removed: "{distDir}""""
-  except CatchableError:
-    rmDirIfExist(workDirPath)
-    stderrMsgAndExit fmt"failed to remove distDir: {distDir}"
+    removeDir(distDir, checkDir = true)
+    echo fmt"""Removed: '{distDir}'"""
+  except OSError as e:
+    utils.rmdir(workDirPath)
+    stderrMsgAndExit fmt"failed to removeDir: {e.msg}"
 
   # ワークスペースを作業パスから distDir へ移動
   try:
     moveDir(workDirPath, distDir)
-    echo fmt"""Moved: "{workDirPath}" to "{distDir}""""
-    echo fmt"""Updated: "{distDir}""""
-  except CatchableError:
-    rmDirIfExist(workDirPath)
-    stderrMsgAndExit fmt"failed to move directory to {distDir}"
+    echo fmt"""Moved: '{workDirPath}' to '{distDir}'"""
+    echo fmt"""Updated: '{distDir}'"""
+  except OSError as e:
+    utils.rmdir(workDirPath)
+    stderrMsgAndExit fmt"failed to moveDir: {e.msg}"

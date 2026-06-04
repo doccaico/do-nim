@@ -19,14 +19,6 @@ proc stderrMsgAndExit*(msg: string) {.noreturn.} =
   stderr.writeLine msg
   quit QuitFailure
 
-proc rmIfExist*(path: string) =
-  if fileExists(path):
-    removeFile(path)
-
-proc rmDirIfExist*(path: string) =
-  if dirExists(path):
-    removeDir(path)
-
 proc rmDir*(path: string) =
   try:
     removeDir(path, checkDir = true)
