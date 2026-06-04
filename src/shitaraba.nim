@@ -57,7 +57,7 @@ proc run*(argv: seq[string]) =
   const LessOpt = "-R -i --silent"
   discard execCmd(fmt"less {LessOpt} {tmpFile}")
 
-  rmIfExist(tmpFile)
+  removeFile(tmpFile)
 
 when isMainModule:
   run(commandLineParams())

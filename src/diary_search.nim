@@ -56,7 +56,7 @@ proc run*(argv: seq[string]) =
   let lessExitCode = lessProcess.waitForExit()
   lessProcess.close()
 
-  rmIfExist(tmpFile)
+  removeFile(tmpFile)
 
   if lessExitCode != 0:
     stderrMsgAndExit fmt"'less' failed with exit code {lessExitCode}"
